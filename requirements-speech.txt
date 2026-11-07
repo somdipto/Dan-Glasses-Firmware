@@ -1,0 +1,16 @@
+# POSIX local speech: Python 3.12.13, whisper.cpp CLI 1.9.2, CPU-only Piper.
+# Local Piper replies also require external FFmpeg (prepared version 8.1.1).
+# Its native libswresample converts Piper's 22050 Hz PCM to board-safe 16000 Hz.
+# FFmpeg is LGPL-2.1+ by default; the prepared --enable-gpl/--enable-version3 build is GPLv3+.
+-r requirements.txt
+coloredlogs==15.0.1
+flatbuffers==25.12.19
+humanfriendly==10.0
+mpmath==1.3.0
+numpy==2.5.4
+onnxruntime==1.23.2
+packaging==26.3
+pathvalidate==3.3.1
+piper-tts==1.8.0
+protobuf==7.36.2
+sympy==1.14.0

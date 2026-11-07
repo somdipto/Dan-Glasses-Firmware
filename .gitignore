@@ -1,0 +1,41 @@
+# Credentials, device identity, TLS material and local configuration
+.secrets/
+.env
+.env.*
+*.env
+!server/.env.example
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+*credentials*.json
+*.token
+*devices.json
+*device_settings.json
+
+# Private runtime evidence, audio and build output
+.runtime/
+.audit/
+.scratch/
+.gauntlet/
+backup_original/
+models/
+recordings/
+*.wav
+*.pcm
+*.mp3
+*.log
+*.bin
+*.elf
+*.map
+firmware/build/
+
+# Local environments and generated files
+.venv*/
+venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+.idea/
+.vscode/
