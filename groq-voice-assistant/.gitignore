@@ -1,0 +1,15 @@
+# Secrets - never share or commit
+server/.env
+backup_original/ardui.txt
+
+__pycache__/
+*.pyc
+firmware/build/
+server/last_question.wav
+server/recordings/
+server/server.log
+tools/device_settings.json
+reply.wav
+
+# local Python environment
+.venv/

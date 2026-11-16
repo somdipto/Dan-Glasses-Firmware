@@ -1,0 +1,13 @@
+# Never convert line endings in binary files
+*.pdf binary
+*.wav binary
+*.png binary
+*.jpg binary
+*.zip binary
+
+# Windows scripts keep CRLF
+*.bat text eol=crlf
+
+# macOS/Linux scripts must keep LF, or bash fails with "\r: command not found"
+*.sh text eol=lf
+*.command text eol=lf

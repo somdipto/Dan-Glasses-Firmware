@@ -1,0 +1,4 @@
+dependencies:
+  idf: ">=5.5.0,<5.6.0"
+  # Same core version the Arduino build pins (esp32:esp32@3.3.10).
+  espressif/arduino-esp32: "==3.3.10"

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voice Glasses Wiring</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --fg: #1d2330;
+    --muted: #5d6675;
+    --border: #d5dae2;
+    --accent: #1f5fbf;
+    --w-3v3: #d32f2f;
+    --w-5v: #b0186a;
+    --w-gnd: #59616e;
+    --w-sck: #1f6fe0;
+    --w-ws: #7a3fd6;
+    --w-sd: #08865a;
+    --w-din: #c76a00;
+    --w-spk-pos: #d32f2f;
+    --w-spk-neg: #3b414b;
+    --fault: #e0161b;
+    --ok: #0b7a4b;
+    --warn: #a35d00;
+    --fault-bg: #fdecec;
+    --ok-bg: #e8f5ee;
+    --warn-bg: #fff4e0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #13161c;
+      --surface: #1c2029;
+      --fg: #e7eaf0;
+      --muted: #a2aab7;
+      --border: #333a47;
+      --accent: #7fb0ff;
+      --w-3v3: #ff6b6b;
+      --w-5v: #f06aaf;
+      --w-gnd: #a5adba;
+      --w-sck: #6aa8ff;
+      --w-ws: #b48cff;
+      --w-sd: #3fd39a;
+      --w-din: #ffb44d;
+      --w-spk-pos: #ff6b6b;
+      --w-spk-neg: #c9ced8;
+      --fault: #ff5a5f;
+      --ok: #4fd18f;
+      --warn: #ffb44d;
+      --fault-bg: #3a1d20;
+      --ok-bg: #16301f;
+      --warn-bg: #3a2b14;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #13161c;
+    --surface: #1c2029;
+    --fg: #e7eaf0;
+    --muted: #a2aab7;
+    --border: #333a47;
+    --accent: #7fb0ff;
+    --w-3v3: #ff6b6b;
+    --w-5v: #f06aaf;
+    --w-gnd: #a5adba;
+    --w-sck: #6aa8ff;
+    --w-ws: #b48cff;
+    --w-sd: #3fd39a;
+    --w-din: #ffb44d;
+    --w-spk-pos: #ff6b6b;
+    --w-spk-neg: #c9ced8;
+    --fault: #ff5a5f;
+    --ok: #4fd18f;
+    --warn: #ffb44d;
+    --fault-bg: #3a1d20;
+    --ok-bg: #16301f;
+    --warn-bg: #3a2b14;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 1180px; margin: 0 auto; padding: 28px 16px 48px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 19px; margin: 34px 0 10px; }
+  .lede { color: var(--muted); margin: 0 0 8px; }
+  figure {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  figure svg { display: block; width: 100%; height: auto; color: var(--fg); }
+  figcaption { color: var(--muted); font-size: 13.5px; margin-top: 8px; }
+  .scroll { overflow-x: auto; }
+  .scroll svg { min-width: 760px; }
+
+  /* SVG parts */
+  .box { fill: var(--surface); stroke: currentColor; stroke-width: 1.5; }
+  .box-soft { fill: var(--bg); stroke: var(--border); stroke-width: 1.5; }
+  .t { fill: currentColor; font-size: 13px; }
+  .t-s { fill: var(--muted); font-size: 11.5px; }
+  .t-b { fill: currentColor; font-size: 15px; font-weight: 650; }
+  .pin { fill: var(--surface); stroke: currentColor; stroke-width: 1.4; }
+  .flow { stroke: currentColor; stroke-width: 1.6; fill: none; }
+  .w { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .dot { stroke: none; }
+  .w-3v3 { stroke: var(--w-3v3); } .f-3v3 { fill: var(--w-3v3); }
+  .w-5v  { stroke: var(--w-5v); }  .f-5v  { fill: var(--w-5v); }
+  .w-gnd { stroke: var(--w-gnd); } .f-gnd { fill: var(--w-gnd); }
+  .w-sck { stroke: var(--w-sck); } .f-sck { fill: var(--w-sck); }
+  .w-ws  { stroke: var(--w-ws); }  .f-ws  { fill: var(--w-ws); }
+  .w-sd  { stroke: var(--w-sd); }
+  .w-din { stroke: var(--w-din); }
+  .w-spk-pos { stroke: var(--w-spk-pos); }
+  .w-spk-neg { stroke: var(--w-spk-neg); }
+  .t-fault { fill: var(--fault); font-size: 12.5px; font-weight: 650; }
+  .t-warn { fill: var(--warn); font-size: 12px; font-weight: 600; }
+  .nc { stroke: var(--muted); stroke-width: 1.5; }
+
+  /* Correct vs current view */
+  .mode-ideal .now { display: none; }
+  .mode-now .ideal { display: none; }
+  .mode-now .seg-sck, .mode-now .lr {
+    stroke: var(--fault);
+    stroke-dasharray: 7 6;
+  }
+
+  .toggle {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px;
+    background: var(--surface);
+    margin: 4px 0 12px;
+    flex-wrap: wrap;
+  }
+  .toggle button {
+    border: 0;
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    font-size: 14px;
+    padding: 7px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .toggle button[aria-pressed="true"] { background: var(--accent); color: var(--surface); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .legend span::before {
+    content: "";
+    display: inline-block;
+    width: 22px; height: 4px;
+    border-radius: 2px;
+    margin-right: 6px;
+    vertical-align: middle;
+    background: var(--c);
+  }
+
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--bg); font-weight: 650; }
+  tr:last-child td { border-bottom: 0; }
+  .tablewrap { overflow-x: auto; }
+  .pill { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+  .pill.ok { background: var(--ok-bg); color: var(--ok); }
+  .pill.bad { background: var(--fault-bg); color: var(--fault); }
+  .pill.warn { background: var(--warn-bg); color: var(--warn); }
+  .rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+  .rule { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--fault); border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+  .rule b { display: block; margin-bottom: 2px; }
+  .muted { color: var(--muted); font-size: 13.5px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Voice Glasses Wiring</h1>
+  <p class="lede">XIAO ESP32-S3 + INMP441 microphone + MAX98357A amplifier + speaker, with the laptop server and Groq. Based on the firmware pin map and your photos from 3 November.</p>
+
+  <h2>1. End-to-end flow</h2>
+  <figure>
+    <div class="scroll">
+    <svg viewBox="0 0 1240 230" role="img" aria-label="Your voice goes from the mic to the XIAO, over Wi-Fi to the laptop server, to Groq for speech-to-text, answer and voice, and the spoken reply comes back the same way to the amplifier and speaker.">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <!-- top row: input -->
+      <rect class="box-soft" x="20" y="22" width="130" height="56" rx="10"/>
+      <text class="t" x="85" y="55" text-anchor="middle">You speak</text>
+      <rect class="box" x="200" y="22" width="200" height="56" rx="10"/>
+      <text class="t" x="300" y="47" text-anchor="middle">INMP441 mic</text>
+      <text class="t-s" x="300" y="65" text-anchor="middle">right hinge</text>
+      <line class="flow" x1="150" y1="50" x2="196" y2="50" marker-end="url(#ah)"/>
+      <text class="t-s" x="173" y="40" text-anchor="middle">voice</text>
+      <line class="flow" x1="400" y1="50" x2="466" y2="50" marker-end="url(#ah)"/>
+      <text class="t-s" x="433" y="40" text-anchor="middle">I2S</text>
+
+      <!-- bottom row: output -->
+      <rect class="box-soft" x="20" y="150" width="110" height="56" rx="10"/>
+      <text class="t" x="75" y="183" text-anchor="middle">You hear</text>
+      <rect class="box" x="160" y="150" width="110" height="56" rx="10"/>
+      <text class="t" x="215" y="183" text-anchor="middle">Speaker</text>
+      <rect class="box" x="300" y="150" width="120" height="56" rx="10"/>
+      <text class="t" x="360" y="175" text-anchor="middle">MAX98357A</text>
+      <text class="t-s" x="360" y="193" text-anchor="middle">amplifier</text>
+      <line class="flow" x1="470" y1="178" x2="424" y2="178" marker-end="url(#ah)"/>
+      <text class="t-s" x="447" y="168" text-anchor="middle">I2S</text>
+      <line class="flow" x1="300" y1="178" x2="274" y2="178" marker-end="url(#ah)"/>
+      <line class="flow" x1="160" y1="178" x2="134" y2="178" marker-end="url(#ah)"/>
+
+      <!-- XIAO -->
+      <rect class="box" x="470" y="22" width="160" height="184" rx="12"/>
+      <text class="t-b" x="550" y="100" text-anchor="middle">XIAO</text>
+      <text class="t-b" x="550" y="120" text-anchor="middle">ESP32-S3</text>
+      <text class="t-s" x="550" y="142" text-anchor="middle">records, sends,</text>
+      <text class="t-s" x="550" y="157" text-anchor="middle">plays reply</text>
+
+      <!-- laptop -->
+      <rect class="box" x="720" y="22" width="180" height="184" rx="12"/>
+      <text class="t-b" x="810" y="100" text-anchor="middle">Laptop</text>
+      <text class="t" x="810" y="120" text-anchor="middle">server.py</text>
+      <text class="t-s" x="810" y="142" text-anchor="middle">wake word,</text>
+      <text class="t-s" x="810" y="157" text-anchor="middle">noise filter</text>
+      <line class="flow" x1="630" y1="60" x2="716" y2="60" marker-end="url(#ah)"/>
+      <text class="t-s" x="675" y="50" text-anchor="middle">WAV, Wi-Fi</text>
+      <line class="flow" x1="720" y1="168" x2="634" y2="168" marker-end="url(#ah)"/>
+      <text class="t-s" x="675" y="158" text-anchor="middle">reply WAV</text>
+      <text class="t-s" x="675" y="112" text-anchor="middle">2.4 GHz</text>
+      <text class="t-s" x="675" y="127" text-anchor="middle">hotspot</text>
+
+      <!-- groq -->
+      <rect class="box" x="990" y="22" width="230" height="184" rx="12"/>
+      <text class="t-b" x="1105" y="54" text-anchor="middle">Groq cloud</text>
+      <text class="t" x="1105" y="90" text-anchor="middle">Whisper: speech to text</text>
+      <text class="t" x="1105" y="118" text-anchor="middle">gpt-oss: the answer</text>
+      <text class="t" x="1105" y="146" text-anchor="middle">Orpheus: text to speech</text>
+      <line class="flow" x1="900" y1="60" x2="986" y2="60" marker-end="url(#ah)"/>
+      <text class="t-s" x="945" y="50" text-anchor="middle">audio, text</text>
+      <line class="flow" x1="990" y1="168" x2="904" y2="168" marker-end="url(#ah)"/>
+      <text class="t-s" x="945" y="158" text-anchor="middle">answer + voice</text>
+    </svg>
+    </div>
+    <figcaption>The glasses only capture and play sound; all understanding happens on the laptop and at Groq. The board and laptop must be on the same 2.4 GHz Wi-Fi.</figcaption>
+  </figure>
+
+  <h2>2. Wiring diagram</h2>
+  <div class="toggle" role="group" aria-label="Diagram view">
+    <button type="button" data-mode="ideal" aria-pressed="true">Correct wiring</button>
+    <button type="button" data-mode="now" aria-pressed="false">Your wiring now (from photos)</button>
+  </div>
+  <figure id="wiring" class="mode-ideal">
+    <div class="scroll">
+    <svg viewBox="0 0 1260 660" role="img" aria-label="Wiring: XIAO 3V3 to mic VDD; GND to mic GND, mic L/R and amp GND; D0 to mic SD; D1 to mic SCK and amp BCLK; D2 to mic WS and amp LRC; D3 to amp DIN; 5V to amp VIN; amp plus and minus to the speaker's red and black wires.">
+      <!-- XIAO -->
+      <rect class="box" x="390" y="70" width="360" height="110" rx="12"/>
+      <rect class="box" x="545" y="52" width="50" height="20" rx="4"/>
+      <text class="t-s" x="570" y="40" text-anchor="middle">USB-C to laptop (power + flashing)</text>
+      <text class="t-b" x="570" y="108" text-anchor="middle">XIAO ESP32-S3</text>
+      <text class="t-s" x="570" y="128" text-anchor="middle">inside the frame</text>
+      <g class="t" text-anchor="middle" font-size="12">
+        <text class="t" x="420" y="168" text-anchor="middle">3V3</text>
+        <text class="t" x="470" y="168" text-anchor="middle">GND</text>
+        <text class="t" x="520" y="168" text-anchor="middle">D0</text>
+        <text class="t" x="570" y="168" text-anchor="middle">D1</text>
+        <text class="t" x="620" y="168" text-anchor="middle">D2</text>
+        <text class="t" x="670" y="168" text-anchor="middle">D3</text>
+        <text class="t" x="720" y="168" text-anchor="middle">5V</text>
+      </g>
+
+      <!-- vertical drops from XIAO pins -->
+      <path class="w w-3v3" d="M420 180 V250"/>
+      <path class="w w-gnd" d="M470 180 V290"/>
+      <path class="w w-sd"  d="M520 180 V330"/>
+      <path class="w w-sck" d="M570 180 V370"/>
+      <path class="w w-ws"  d="M620 180 V410"/>
+      <path class="w w-din" d="M670 180 V450"/>
+      <path class="w w-5v"  d="M720 180 V490"/>
+
+      <!-- rails -->
+      <path class="w w-3v3" d="M230 250 H420"/>
+      <path class="w w-gnd" d="M230 290 H880"/>
+      <path class="w w-sd"  d="M230 330 H520"/>
+      <path class="w w-sck seg-sck" d="M230 370 H570"/>
+      <path class="w w-sck" d="M570 370 H880"/>
+      <path class="w w-ws"  d="M230 410 H880"/>
+      <path class="w w-din" d="M670 450 H880"/>
+      <path class="w w-5v"  d="M720 490 H880"/>
+      <circle class="dot f-gnd" cx="470" cy="290" r="5"/>
+      <circle class="dot f-sck" cx="570" cy="370" r="5"/>
+      <circle class="dot f-ws"  cx="620" cy="410" r="5"/>
+
+      <!-- XIAO pin stubs -->
+      <g>
+        <rect class="pin" x="414" y="176" width="12" height="8" rx="2"/>
+        <rect class="pin" x="464" y="176" width="12" height="8" rx="2"/>
+        <rect class="pin" x="514" y="176" width="12" height="8" rx="2"/>
+        <rect class="pin" x="564" y="176" width="12" height="8" rx="2"/>
+        <rect class="pin" x="614" y="176" width="12" height="8" rx="2"/>
+        <rect class="pin" x="664" y="176" width="12" height="8" rx="2"/>
+        <rect class="pin" x="714" y="176" width="12" height="8" rx="2"/>
+      </g>
+
+      <!-- rail labels -->
+      <text class="t-s" x="325" y="243" text-anchor="middle">3.3 V power</text>
+      <text class="t-s" x="350" y="283" text-anchor="middle">ground (shared)</text>
+      <text class="t-s" x="390" y="323" text-anchor="middle">mic data</text>
+      <text class="t-s ideal" x="400" y="363" text-anchor="middle">bit clock (shared)</text>
+      <text class="t-s" x="790" y="363" text-anchor="middle">bit clock</text>
+      <text class="t-s" x="790" y="403" text-anchor="middle">word select (shared)</text>
+      <text class="t-s" x="790" y="443" text-anchor="middle">speaker data</text>
+      <text class="t-s" x="790" y="483" text-anchor="middle">5 V power</text>
+
+      <!-- MIC -->
+      <text class="t-b" x="145" y="206" text-anchor="middle">INMP441 mic</text>
+      <rect class="box" x="60" y="222" width="170" height="256" rx="12"/>
+      <g text-anchor="end">
+        <text class="t" x="218" y="254" text-anchor="end">VDD</text>
+        <text class="t" x="218" y="294" text-anchor="end">GND</text>
+        <text class="t" x="218" y="334" text-anchor="end">SD</text>
+        <text class="t" x="218" y="374" text-anchor="end">SCK</text>
+        <text class="t" x="218" y="414" text-anchor="end">WS</text>
+        <text class="t" x="218" y="454" text-anchor="end">L/R</text>
+      </g>
+      <text class="t-s" x="110" y="350" text-anchor="middle">sound hole</text>
+      <text class="t-s" x="110" y="365" text-anchor="middle">faces mouth</text>
+      <path class="w w-gnd lr" d="M230 450 H258 V290"/>
+      <circle class="dot f-gnd ideal" cx="258" cy="290" r="5"/>
+      <text class="t-s ideal" x="266" y="446">L/R to GND</text>
+      <g>
+        <circle class="pin" cx="230" cy="250" r="5"/>
+        <circle class="pin" cx="230" cy="290" r="5"/>
+        <circle class="pin" cx="230" cy="330" r="5"/>
+        <circle class="pin" cx="230" cy="370" r="5"/>
+        <circle class="pin" cx="230" cy="410" r="5"/>
+        <circle class="pin" cx="230" cy="450" r="5"/>
+      </g>
+
+      <!-- AMP -->
+      <text class="t-b" x="965" y="248" text-anchor="middle">MAX98357A amp</text>
+      <rect class="box" x="880" y="262" width="170" height="336" rx="12"/>
+      <g>
+        <text class="t" x="892" y="294">GND</text>
+        <text class="t" x="892" y="374">BCLK</text>
+        <text class="t" x="892" y="414">LRC</text>
+        <text class="t" x="892" y="454">DIN</text>
+        <text class="t" x="892" y="494">VIN</text>
+        <text class="t" x="892" y="534">GAIN</text>
+        <text class="t" x="892" y="574">SD</text>
+        <text class="t" x="1040" y="384" text-anchor="end">SPK +</text>
+        <text class="t" x="1040" y="444" text-anchor="end">SPK −</text>
+      </g>
+      <path class="nc" d="M858 530 H874"/>
+      <path class="nc" d="M858 570 H874"/>
+      <text class="t-s" x="852" y="534" text-anchor="end">not connected</text>
+      <text class="t-s" x="852" y="574" text-anchor="end">not connected</text>
+      <g>
+        <circle class="pin" cx="880" cy="290" r="5"/>
+        <circle class="pin" cx="880" cy="370" r="5"/>
+        <circle class="pin" cx="880" cy="410" r="5"/>
+        <circle class="pin" cx="880" cy="450" r="5"/>
+        <circle class="pin" cx="880" cy="490" r="5"/>
+        <circle class="pin" cx="880" cy="530" r="5"/>
+        <circle class="pin" cx="880" cy="570" r="5"/>
+        <circle class="pin" cx="1050" cy="380" r="5"/>
+        <circle class="pin" cx="1050" cy="440" r="5"/>
+      </g>
+
+      <!-- SPEAKER -->
+      <text class="t-b" x="1195" y="338" text-anchor="middle">Speaker</text>
+      <rect class="box" x="1150" y="352" width="90" height="118" rx="10"/>
+      <circle cx="1195" cy="411" r="30" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="1195" cy="411" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <g class="ideal">
+        <path class="w w-spk-pos" d="M1050 380 H1150"/>
+        <path class="w w-spk-neg" d="M1050 440 H1150"/>
+        <text class="t-s" x="1100" y="372" text-anchor="middle">red</text>
+        <text class="t-s" x="1100" y="432" text-anchor="middle">black</text>
+      </g>
+
+      <!-- CURRENT STATE (from photos) -->
+      <g class="now">
+        <text class="t-fault" x="400" y="362" text-anchor="middle">✕ SCK not connected</text>
+        <text class="t-fault" x="266" y="470">✕ L/R not connected (likely)</text>
+        <!-- speaker red dangling -->
+        <path class="w" stroke="var(--fault)" stroke-dasharray="7 6" d="M1150 380 H1112 L1100 398"/>
+        <text class="t-fault" x="1100" y="344" text-anchor="middle">✕ red unplugged</text>
+        <!-- speaker black to 3V -->
+        <path class="w" stroke="var(--fault)" stroke-dasharray="7 6" d="M1150 440 H1120 V626"/>
+        <text class="t-fault" x="1128" y="646">✕ black on 3V (wrong)</text>
+        <text class="t-warn" x="955" y="622" text-anchor="middle">⚠ twisted joints on header: solder them</text>
+        <text class="t-warn" x="145" y="500" text-anchor="middle">4 of 6 pins wired</text>
+      </g>
+    </svg>
+    </div>
+    <figcaption id="wiring-caption">Correct wiring. D1 and D2 are shared: each XIAO pin feeds both the mic and the amp. Only the mic uses 3.3 V; the amp uses 5 V; the speaker connects only to the amp's SPK + and SPK −.</figcaption>
+    <div class="legend">
+      <span style="--c: var(--w-3v3)">3.3 V</span>
+      <span style="--c: var(--w-5v)">5 V</span>
+      <span style="--c: var(--w-gnd)">GND</span>
+      <span style="--c: var(--w-sd)">mic data (SD)</span>
+      <span style="--c: var(--w-sck)">bit clock (SCK / BCLK)</span>
+      <span style="--c: var(--w-ws)">word select (WS / LRC)</span>
+      <span style="--c: var(--w-din)">speaker data (DIN)</span>
+    </div>
+  </figure>
+
+  <h2>3. Pin-by-pin checklist</h2>
+  <p class="muted">Status comes from your photos and the board's tests on 3 November. "Not checked" means the photo couldn't show it; confirm with a multimeter on continuity (beep) mode.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>From</th><th>To</th><th>What it carries</th><th>Status now</th></tr></thead>
+    <tbody>
+      <tr><td>Mic VDD</td><td>XIAO 3V3</td><td>Mic power</td><td><span class="pill warn">wired, not checked</span></td></tr>
+      <tr><td>Mic GND</td><td>XIAO GND</td><td>Ground</td><td><span class="pill warn">wired, not checked</span></td></tr>
+      <tr><td>Mic SD</td><td>XIAO D0</td><td>Sound data to the board</td><td><span class="pill warn">wired, not checked</span></td></tr>
+      <tr><td>Mic WS</td><td>XIAO D2 (with amp LRC)</td><td>Word select</td><td><span class="pill warn">wired, not checked</span></td></tr>
+      <tr><td>Mic SCK</td><td>XIAO D1 (with amp BCLK)</td><td>Bit clock</td><td><span class="pill bad">not connected</span></td></tr>
+      <tr><td>Mic L/R</td><td>GND</td><td>Selects mic channel</td><td><span class="pill bad">likely not connected</span></td></tr>
+      <tr><td>Amp VIN</td><td>XIAO 5V</td><td>Amp power</td><td><span class="pill warn">not checked</span></td></tr>
+      <tr><td>Amp GND</td><td>XIAO GND</td><td>Ground</td><td><span class="pill warn">not checked</span></td></tr>
+      <tr><td>Amp BCLK</td><td>XIAO D1</td><td>Bit clock</td><td><span class="pill warn">twisted joint</span></td></tr>
+      <tr><td>Amp LRC</td><td>XIAO D2</td><td>Word select</td><td><span class="pill warn">twisted joint</span></td></tr>
+      <tr><td>Amp DIN</td><td>XIAO D3</td><td>Speaker data</td><td><span class="pill warn">not checked</span></td></tr>
+      <tr><td>Amp GAIN, SD</td><td>nothing</td><td>Defaults: 9 dB gain, on</td><td><span class="pill ok">leave unconnected</span></td></tr>
+      <tr><td>Amp SPK +</td><td>Speaker red</td><td>Sound out</td><td><span class="pill bad">red unplugged</span></td></tr>
+      <tr><td>Amp SPK −</td><td>Speaker black</td><td>Sound out</td><td><span class="pill bad">black is on 3V</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="muted">Real header order on the amp board: LRC, BCLK, DIN, GAIN, SD, GND, VIN. On the mic board: GND, VDD, SD on one side; L/R, WS, SCK on the other.</p>
+
+  <h2>4. Rules that prevent damage</h2>
+  <div class="rules">
+    <div class="rule"><b>Speaker only on SPK + / SPK −</b>Never connect a speaker wire to 3V, 5V or GND: it shorts the supply through the coil.</div>
+    <div class="rule"><b>Mic on 3.3 V only</b>The INMP441 is a 3.3 V part; 5 V can destroy it.</div>
+    <div class="rule"><b>Solder, don't twist</b>Twisted joints work on the desk and fail when the hinge moves.</div>
+    <div class="rule"><b>Battery to BAT pads</b>A 3.7 V LiPo goes to the XIAO's BAT pads on the back, never to the 3V3 pin.</div>
+    <div class="rule"><b>Unplug before rewiring</b>Remove the USB cable before soldering or moving any wire.</div>
+  </div>
+</main>
+<script>
+  (function () {
+    var fig = document.getElementById("wiring");
+    var cap = document.getElementById("wiring-caption");
+    var captions = {
+      ideal: "Correct wiring. D1 and D2 are shared: each XIAO pin feeds both the mic and the amp. Only the mic uses 3.3 V; the amp uses 5 V; the speaker connects only to the amp's SPK + and SPK −.",
+      now: "Your wiring from the 3 November photos. Red marks are faults: the mic's SCK and L/R are missing (so the mic reads 0), the speaker's black wire is on 3V and its red wire is loose. Other wires are present but not verified pin by pin."
+    };
+    var buttons = document.querySelectorAll(".toggle button");
+    function setMode(mode) {
+      fig.className = "mode-" + mode;
+      cap.textContent = captions[mode];
+      buttons.forEach(function (b) {
+        b.setAttribute("aria-pressed", b.getAttribute("data-mode") === mode ? "true" : "false");
+      });
+    }
+    buttons.forEach(function (b) {
+      b.addEventListener("click", function () { setMode(b.getAttribute("data-mode")); });
+    });
+  })();
+</script>
+</body>
+</html>
